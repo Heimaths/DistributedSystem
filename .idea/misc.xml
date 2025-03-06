@@ -5,6 +5,9 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/Energy Producer/disys-energy-app/pom.xml" />
+        <option value="$PROJECT_DIR$/Energy Consumer/disys-energy-app/pom.xml" />
+        <option value="$PROJECT_DIR$/Energy Producer/pom.xml" />
+        <option value="$PROJECT_DIR$/Energy Consumer/pom.xml" />
       </list>
     </option>
   </component>

@@ -9,12 +9,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @Service
-public class CommunityProducer {
+public class CommunityConsumer {
 
     private final RabbitTemplate rabbitTemplate;
     private final Random random = new Random();
 
-    public CommunityProducer(RabbitTemplate rabbitTemplate) {
+    public CommunityConsumer(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
