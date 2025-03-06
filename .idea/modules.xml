@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DistributedSystem.iml" filepath="$PROJECT_DIR$/.idea/DistributedSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/disys-energy-app/disys-energy-app.iml" filepath="$PROJECT_DIR$/disys-energy-app/disys-energy-app.iml" />
     </modules>
   </component>
 </project>
