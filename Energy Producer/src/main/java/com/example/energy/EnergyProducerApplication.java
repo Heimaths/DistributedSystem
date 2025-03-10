@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling  // Diese Annotation sorgt dafür, dass @Scheduled Methoden laufen
-public class EnergyApplication {
+public class EnergyProducerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(EnergyApplication.class, args);
+        SpringApplication.run(EnergyProducerApplication.class, args);
     }
 }

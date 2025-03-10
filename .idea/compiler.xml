@@ -8,7 +8,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Producer" />
         <module name="energy-consumer" />
-        <module name="disys-energy-app" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
