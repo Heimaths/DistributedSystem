@@ -12,8 +12,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>Consumer</artifactId>
+    <artifactId>energy-consumer</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>Energy Consumer</name>
+    <description>Energy Consumer Application</description>
     <packaging>jar</packaging>
 
     <dependencies>
