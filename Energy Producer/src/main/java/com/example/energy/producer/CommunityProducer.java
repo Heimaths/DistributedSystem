@@ -33,7 +33,4 @@ public class CommunityProducer {
     private double getRandomKwh() {
         return 0.001 + (0.004 * random.nextDouble());  // Werte zwischen 0.001 und 0.005 kWh
     }
-
-    public void sendEnergyMessage(String message) {
-    }
 }
