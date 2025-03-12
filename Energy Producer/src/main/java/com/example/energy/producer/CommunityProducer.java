@@ -1,5 +1,6 @@
 package com.example.energy.producer;
 
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,42 +26,9 @@ public class CommunityProducer {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    private void displayWeatherData() {
-        try {
-            URL url = new URL("http://api.weatherapi.com/v1/current.json?key=YOUR_API_KEY&q=Vienna&aqi=no");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                throw new RuntimeException("HttpResponseCode: " + responseCode);
-            } else {
-                StringBuilder inline = new StringBuilder();
-                Scanner scanner = new Scanner(url.openStream());
-                while (scanner.hasNext()) {
-                    inline.append(scanner.nextLine());
-                }
-                scanner.close();
-
-                JSONParser parse = new JSONParser();
-                JSONObject data_obj = (JSONObject) parse.parse(inline.toString());
-                JSONObject current = (JSONObject) data_obj.get("current");
-                temp = (double) current.get("temp_c");
-                
-                System.out.println("Current temperature in Vienna: " + temp + "°C");
-            }
-        } catch (Exception e) {
-            System.out.println("Error fetching weather data: " + e.getMessage());
-            // Fallback temperature if API call fails
-            temp = 20.0;
-        }
-    }
-
     @Scheduled(fixedRate = 5000)  // alle 5 Sekunden eine Nachricht senden
     public void sendPeriodicEnergyMessage() {
-        displayWeatherData(); // Update temperature data
-        double kwh = calculateKwhBasedOnWeather();
+        double kwh = getRandomKwh();
         String message = String.format(
                 "{\"type\": \"PRODUCER\", \"association\": \"COMMUNITY\", \"kwh\": %.3f, \"datetime\": \"%s\"}",
                 kwh,
@@ -70,30 +38,94 @@ public class CommunityProducer {
         System.out.println("Automatically sent: " + message);
     }
 
-    private double calculateKwhBasedOnWeather() {
-        // Basisproduktion
-        double baseProduction = 0.003;
-        
-        // Temperatureinfluss (mehr Produktion bei höheren Temperaturen, da mehr Sonnenschein)
-        double tempFactor = Math.max(0.5, Math.min(2.0, temp / 20.0));
-        
-        // Tageszeit-Einfluss
-        int hour = LocalDateTime.now().getHour();
-        double timeFactor = 1.0;
-        
-        // Höhere Produktion während Tagesstunden (8-18 Uhr)
-        if (hour >= 8 && hour <= 18) {
-            timeFactor = 2.0;
+    private double getRandomKwh() {
+        if (temp > 10){
+            return 0.001 + (0.004 * random.nextDouble()*2);  // Werte zwischen 0.001 und 0.005 kWh
+    }
+        else return 0.001 + (0.004 * random.nextDouble());  // Werte zwischen 0.001 und 0.005 kWh
+    }
+
+    public static void displayWeatherData() {
+
+        try {
+            // 1. Fetch the API response based on API Link
+            String url = "https://api.openweathermap.org/data/2.5/weather?lat=48.21&lon=16.36&units=metric&appid=3c8aab4d3346f32df1d6dbe09d215f9f";
+            HttpURLConnection apiConnection = fetchApiResponse(url);
+
+            // check for response status
+            // 200 - means that the connection was a success
+            if (apiConnection.getResponseCode() != 200) {
+                System.out.println("Error: Could not connect to API test1");
+                return;
+            }
+
+            // 2. Read the response and convert store String type
+            String jsonResponse = readApiResponse(apiConnection);
+
+            // 3. Parse the string into a JSON Object
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonResponse);
+            JSONObject currentWeatherJson = (JSONObject) jsonObject.get("main");
+//            System.out.println(currentWeatherJson.toJSONString());
+
+            // 4. Store the data into their corresponding data type
+            String timezone = (String) currentWeatherJson.get("timezone");
+            System.out.println("Current Time: " + timezone);
+
+            double temperature = (double) currentWeatherJson.get("temp");
+            System.out.println("Current Temperature (C): " + temperature);
+             temp =  temperature;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        // Reduzierte Produktion in der Dämmerung (6-8 und 18-20 Uhr)
-        else if ((hour >= 6 && hour < 8) || (hour > 18 && hour <= 20)) {
-            timeFactor = 1.5;
-        }
-        // Minimale Produktion nachts
-        else {
-            timeFactor = 0.5;
+    }
+
+    private static HttpURLConnection fetchApiResponse(String urlString){
+            try{
+                // attempt to create connection
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                // set request method to get
+                conn.setRequestMethod("GET");
+
+                return conn;
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+
+            // could not make connection
+            return null;
         }
 
-        return baseProduction * tempFactor * timeFactor + (0.001 * random.nextDouble());
+
+    private static String readApiResponse(HttpURLConnection apiConnection) {
+        try {
+            // Create a StringBuilder to store the resulting JSON data
+            StringBuilder resultJson = new StringBuilder();
+
+            // Create a Scanner to read from the InputStream of the HttpURLConnection
+            Scanner scanner = new Scanner(apiConnection.getInputStream());
+
+            // Loop through each line in the response and append it to the StringBuilder
+            while (scanner.hasNext()) {
+                // Read and append the current line to the StringBuilder
+                resultJson.append(scanner.nextLine());
+            }
+
+            // Close the Scanner to release resources associated with it
+            scanner.close();
+
+            // Return the JSON data as a String
+            return resultJson.toString();
+
+        } catch (IOException e) {
+            // Print the exception details in case of an IOException
+            e.printStackTrace();
+        }
+
+        // Return null if there was an issue reading the response
+        return null;
     }
-}
+    }
+
