@@ -8,6 +8,8 @@
         <option value="$PROJECT_DIR$/Energy Consumer/disys-energy-app/pom.xml" />
         <option value="$PROJECT_DIR$/Energy Producer/pom.xml" />
         <option value="$PROJECT_DIR$/Energy Consumer/pom.xml" />
+        <option value="$PROJECT_DIR$/Usage Service/pom.xml" />
+        <option value="$PROJECT_DIR$/Current Percentage Service/pom.xml" />
       </list>
     </option>
   </component>
