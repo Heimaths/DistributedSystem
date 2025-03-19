@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Spinner?>
 
 <VBox spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="at.fhtw.disys.UserInterface.DashboardController">
     <padding>
@@ -16,11 +17,14 @@
 
     <Button text="refresh" fx:id="refreshButton"/>
 
-    <GridPane hgap="5" vgap="20">
-     
-        <Button text="Select Start Date" fx:id="startDateButton"/>
+    <GridPane hgap="10" vgap="10">
+        <Label text="Start" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="startDatePicker" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Spinner fx:id="startTimeSpinner" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
 
-        <Button text="Select End Date" GridPane.rowIndex="1" fx:id="endDateButton"/>
+        <Label text="End" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="endDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Spinner fx:id="endTimeSpinner" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
     </GridPane>
 
     <Button text="show data" fx:id="showDataButton"/>
