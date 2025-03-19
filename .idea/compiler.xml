@@ -9,6 +9,7 @@
         <module name="usage-service" />
         <module name="Consumer" />
         <module name="Producer" />
+        <module name="HelloJavaFX" />
         <module name="percentage-service" />
         <module name="energy-consumer" />
         <module name="energy-producer" />

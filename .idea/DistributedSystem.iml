@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Energy Consumer/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Energy Producer/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Usage Service/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/User-Interface" type="java-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="at.fhtw.disys.UserInterface.DashboardController">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <Label text="Community Pool  78.54% used" fx:id="communityPoolLabel"/>
+    <Label text="Grid Portion  7.23%" fx:id="gridPortionLabel"/>
+
+    <Button text="refresh" fx:id="refreshButton"/>
+
+    <GridPane hgap="5" vgap="20">
+     
+        <Button text="Select Start Date" fx:id="startDateButton"/>
+
+        <Button text="Select End Date" GridPane.rowIndex="1" fx:id="endDateButton"/>
+    </GridPane>
+
+    <Button text="show data" fx:id="showDataButton"/>
+
+    <Label text="Community produced  143.024 kWh" fx:id="communityProducedLabel"/>
+    <Label text="Community used  130.101 kWh" fx:id="communityUsedLabel"/>
+    <Label text="Grid used  14.75 kWh" fx:id="gridUsedLabel"/>
+</VBox>
