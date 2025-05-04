@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -9,6 +10,7 @@
         <module name="usage-service" />
         <module name="Consumer" />
         <module name="Producer" />
+        <module name="energy-api" />
         <module name="HelloJavaFX" />
         <module name="percentage-service" />
         <module name="energy-consumer" />
@@ -28,6 +30,7 @@
       <module name="disys-energy-app" options="-parameters" />
       <module name="disys-energy-app (1)" options="-parameters" />
       <module name="disys-energy-app (2)" options="-parameters" />
+      <module name="energy-api" options="-parameters" />
       <module name="energy-consumer" options="-parameters" />
       <module name="energy-producer" options="-parameters" />
       <module name="percentage-service" options="-parameters" />
