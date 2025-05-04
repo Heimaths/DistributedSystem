@@ -2,12 +2,6 @@ spring:
   application:
     name: energy-percentage-service
 
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
   datasource:
     url: jdbc:postgresql://localhost:5432/energy_percentage_db
     username: disysuser
@@ -20,10 +14,18 @@ spring:
       ddl-auto: update
     show-sql: true
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+usage:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/energy_usage_db
+    username: disysuser
+    password: disyspw
+    driver-class-name: org.postgresql.Driver
 
 server:
-  port: 8083 
+  port: 8083

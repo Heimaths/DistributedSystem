@@ -30,6 +30,7 @@ public class CommunityProducer {
     public void sendPeriodicEnergyMessage() {
         double kwh = getRandomKwh();
         String message = String.format(
+                java.util.Locale.US,
                 "{\"type\": \"PRODUCER\", \"association\": \"COMMUNITY\", \"kwh\": %.3f, \"datetime\": \"%s\"}",
                 kwh,
                 LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

@@ -22,6 +22,7 @@ public class CommunityUser {
     public void sendPeriodicEnergyUsage() {
         double kwh = calculateKwhBasedOnTimeOfDay();
         String message = String.format(
+                java.util.Locale.US,
                 "{\"type\": \"USER\", \"association\": \"COMMUNITY\", \"kwh\": %.3f, \"datetime\": \"%s\"}",
                 kwh,
                 LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

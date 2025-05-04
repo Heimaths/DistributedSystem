@@ -1,46 +1,14 @@
-    -- Erstelle die Datenbanken, falls sie nicht existieren
-    DO $$
-    BEGIN
-       IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'energy_usage_db') THEN
-          CREATE DATABASE energy_usage_db;
-       END IF;
-       IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'energy_percentage_db') THEN
-          CREATE DATABASE energy_percentage_db;
-       END IF;
-    END $$;
+-- init.sql
 
-    -- Verbinde mit der energy_usage_db
-    \c energy_usage_db
+-- Diese Datei wird ausgeführt, wenn der Container startet und sich auf "postgres" verbindet.
+-- Daher legen wir hier die DB an und initialisieren NUR "energy_usage_db".
 
-    -- Erstelle die Tabelle für Energy Usage
-    CREATE TABLE IF NOT EXISTS energy_usage (
-        id BIGSERIAL PRIMARY KEY,
-        hour TIMESTAMP NOT NULL UNIQUE,
-        community_produced DOUBLE PRECISION DEFAULT 0.0,
-        community_used DOUBLE PRECISION DEFAULT 0.0,
-        grid_used DOUBLE PRECISION DEFAULT 0.0
-    );
+CREATE DATABASE energy_usage_db;
 
-    -- Verbinde mit der energy_percentage_db
-    \c energy_percentage_db
+-- WICHTIG: danach wird PostgreSQL automatisch beendet. Die folgenden Zeilen wären nur sinnvoll,
+-- wenn du dich nachträglich verbindest. Daher gehört das in eine zweite Datei oder in deinen App-Code.
 
-    -- Erstelle die Tabelle für Energy Percentage
-    CREATE TABLE IF NOT EXISTS energy_percentage (
-        id BIGSERIAL PRIMARY KEY,
-        hour TIMESTAMP NOT NULL UNIQUE,
-        community_depleted DOUBLE PRECISION DEFAULT 0.0,
-        grid_portion DOUBLE PRECISION DEFAULT 0.0
-    );
+-- Optional: Rechte für Benutzer setzen (in der DB energy_usage_db)
+-- Das geht nicht direkt hier, weil du dafür verbunden sein musst.
 
-    -- Gewähre Berechtigungen
-    \c postgres
-    GRANT ALL PRIVILEGES ON DATABASE energy_usage_db TO disysuser;
-    GRANT ALL PRIVILEGES ON DATABASE energy_percentage_db TO disysuser;
-
-    \c energy_usage_db
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO disysuser;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO disysuser;
-
-    \c energy_percentage_db
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO disysuser;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO disysuser;
+-- HINWEIS: Tabelle kann in einem separaten Skript erstellt werden, das beim Start von energy_usage_db ausgeführt wird.
