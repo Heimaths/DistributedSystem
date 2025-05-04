@@ -1,4 +1,4 @@
-package at.fhtw.disys;
+/* package at.fhtw.disys;
 
 import at.fhtw.disys.dto.CurrentHourDto;
 import at.fhtw.disys.dto.HistoricDto;
@@ -45,5 +45,44 @@ public class EnergyController {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+}
+
+
+ */
+
+package at.fhtw.disys.controller;
+
+import at.fhtw.disys.model.EnergyPercentage;
+import at.fhtw.disys.repository.EnergyPercentageRepository;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+@RestController
+@RequestMapping("/energy")
+public class EnergyController {
+
+    private final EnergyPercentageRepository repository;
+
+    public EnergyController(EnergyPercentageRepository repository) {
+        this.repository = repository;
+    }
+
+    @GetMapping("/current")
+    public EnergyPercentage getCurrentHourPercentage() {
+        LocalDateTime currentHour = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
+        return repository.findByHour(currentHour)
+                .orElse(null);
+    }
+
+    @GetMapping("/historical")
+    public List<EnergyPercentage> getHistory(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return repository.findAllByHourBetween(start, end);
     }
 }
