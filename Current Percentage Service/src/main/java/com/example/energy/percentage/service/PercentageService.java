@@ -131,6 +131,7 @@ public class PercentageService {
 
             percentage.setCommunityDepleted(communityDepleted);
             percentage.setGridPortion(gridPortion);
+            log.info("Saving: hour={}, depleted={}%, gridPortion={}%", hourDateTime, communityDepleted, gridPortion);
 
             repository.save(percentage);
             log.info("Updated energy percentages for hour: {}", hourDateTime);

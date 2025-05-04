@@ -51,7 +51,7 @@ public class EnergyController {
 
  */
 
-package at.fhtw.disys.controller;
+package at.fhtw.disys;
 
 import at.fhtw.disys.model.EnergyPercentage;
 import at.fhtw.disys.repository.EnergyPercentageRepository;
