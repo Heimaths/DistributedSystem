@@ -106,6 +106,9 @@ public class PercentageService {
             LocalDateTime hourDateTime = dateTime.truncatedTo(ChronoUnit.HOURS);
 
             JsonNode usageData = usageDataService.getUsageData(hourDateTime);
+            log.info("Requested usage data for hour: {}", hourDateTime);
+            log.info("Result from usageDataService: {}", usageData);
+
             if (usageData == null) {
                 log.warn("No usage data found for hour: {}", hourDateTime);
                 return;
@@ -122,11 +125,17 @@ public class PercentageService {
             double totalUsage = communityUsed + gridUsed;
             double gridPortion = totalUsage > 0 ? (gridUsed / totalUsage) * 100 : 0.0;
 
-            EnergyPercentage percentage = repository.findByHour(hourDateTime)
-                    .orElse(new EnergyPercentage());
 
-            if (percentage.getId() == null) {
+
+            EnergyPercentage percentage = repository.findByHour(hourDateTime)
+                    .orElse(null);
+
+            if (percentage == null) {
+                percentage = new EnergyPercentage();
                 percentage.setHour(hourDateTime);
+                log.info("Creating new EnergyPercentage entry for hour: {}", hourDateTime);
+            } else {
+                log.info("Updating existing EnergyPercentage entry with ID {} for hour: {}", percentage.getId(), hourDateTime);
             }
 
             percentage.setCommunityDepleted(communityDepleted);
