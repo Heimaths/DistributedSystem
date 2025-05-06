@@ -3,7 +3,7 @@ spring:
     name: energy-percentage-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/energy_percentage_db
+    url: jdbc:postgresql://localhost:5432/energy_usage_db
     username: disysuser
     password: disyspw
     driver-class-name: org.postgresql.Driver
@@ -13,6 +13,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
 
   rabbitmq:
     host: localhost
