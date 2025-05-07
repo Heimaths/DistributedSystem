@@ -1,74 +1,4 @@
-/* package com.example.energy.percentage.service;
-
-import com.example.energy.percentage.model.EnergyPercentage;
-import com.example.energy.percentage.repository.EnergyPercentageRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-
-@Service
-@Slf4j
-public class PercentageService {
-
-    private final EnergyPercentageRepository repository;
-    private final ObjectMapper objectMapper;
-
-    public PercentageService(EnergyPercentageRepository repository, ObjectMapper objectMapper) {
-        this.repository = repository;
-        this.objectMapper = objectMapper;
-    }
-
-    @RabbitListener(queues = "energy-queue")
-    @Transactional
-    public void processEnergyMessage(String message) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(message);
-            LocalDateTime dateTime = LocalDateTime.parse(jsonNode.get("datetime").asText());
-            LocalDateTime hourDateTime = dateTime.truncatedTo(ChronoUnit.HOURS);
-
-            // Hole oder erstelle einen neuen Eintrag für die aktuelle Stunde
-            EnergyPercentage percentage = repository.findByHour(hourDateTime)
-                    .orElse(new EnergyPercentage());
-
-            if (percentage.getId() == null) {
-                percentage.setHour(hourDateTime);
-                percentage.setCommunityDepleted(0.0);
-                percentage.setGridPortion(0.0);
-            }
-
-            // Berechne die Prozentsätze basierend auf den empfangenen Daten
-            double communityProduced = jsonNode.get("community_produced").asDouble();
-            double communityUsed = jsonNode.get("community_used").asDouble();
-            double gridUsed = jsonNode.get("grid_used").asDouble();
-
-            // Berechne Community Depletion (wie viel Prozent der Community-Produktion genutzt wurde)
-            double communityDepleted = communityProduced > 0 ? 
-                    Math.min((communityUsed / communityProduced) * 100, 100.0) : 100.0;
-
-            // Berechne Grid Portion (Anteil des Netzbezugs am Gesamtverbrauch)
-            double totalUsage = communityUsed + gridUsed;
-            double gridPortion = totalUsage > 0 ? (gridUsed / totalUsage) * 100 : 0.0;
-
-            percentage.setCommunityDepleted(communityDepleted);
-            percentage.setGridPortion(gridPortion);
-
-            repository.save(percentage);
-            log.info("Updated energy percentages for hour: {}", hourDateTime);
-        } catch (Exception e) {
-            log.error("Error processing message for percentage calculation: {}", message, e);
-        }
-    }
-}
-
-
- */
-
+// src/main/java/com/example/energy/percentage/service/PercentageService.java
 package com.example.energy.percentage.service;
 
 import com.example.energy.percentage.model.EnergyPercentage;
@@ -91,66 +21,73 @@ public class PercentageService {
     private final ObjectMapper objectMapper;
     private final UsageDataService usageDataService;
 
-    public PercentageService(EnergyPercentageRepository repository, ObjectMapper objectMapper, UsageDataService usageDataService) {
+    public PercentageService(EnergyPercentageRepository repository,
+                             ObjectMapper objectMapper,
+                             UsageDataService usageDataService) {
         this.repository = repository;
         this.objectMapper = objectMapper;
         this.usageDataService = usageDataService;
     }
 
-    @RabbitListener(queues = "energy-queue")
+    // 1. Producer-Messages empfängt, extrahiert nur das datetime-Feld
+    @RabbitListener(queues = "Producer-energy-queue")
     @Transactional
-    public void processEnergyMessage(String message) {
+    public void handleProducer(String message) {
+        processPercentage(message);
+    }
+
+    // 2. Consumer-Messages empfängt, extrahiert nur das datetime-Feld
+    @RabbitListener(queues = "Consumer-energy-queue")
+    @Transactional
+    public void handleConsumer(String message) {
+        processPercentage(message);
+    }
+
+    private void processPercentage(String message) {
         try {
             JsonNode jsonNode = objectMapper.readTree(message);
             LocalDateTime dateTime = LocalDateTime.parse(jsonNode.get("datetime").asText());
             LocalDateTime hourDateTime = dateTime.truncatedTo(ChronoUnit.HOURS);
 
+            // Daten aus UsageService abrufen
             JsonNode usageData = usageDataService.getUsageData(hourDateTime);
             log.info("Requested usage data for hour: {}", hourDateTime);
-            log.info("Result from usageDataService: {}", usageData);
 
-            if (usageData == null) {
+            if (usageData == null || usageData.isEmpty()) {
                 log.warn("No usage data found for hour: {}", hourDateTime);
                 return;
             }
 
-            double communityProduced = usageData.get("community_produced").asDouble();
-            double communityUsed = usageData.get("community_used").asDouble();
-            double gridUsed = usageData.get("grid_used").asDouble();
+            double communityProduced = usageData.path("community_produced").asDouble(0.0);
+            double communityUsed     = usageData.path("community_used").asDouble(0.0);
+            double gridUsed          = usageData.path("grid_used").asDouble(0.0);
 
+            // Prozentwerte berechnen
             double communityDepleted = communityProduced > 0
                     ? Math.min((communityUsed / communityProduced) * 100, 100.0)
                     : 100.0;
-
             double totalUsage = communityUsed + gridUsed;
-            double gridPortion = totalUsage > 0 ? (gridUsed / totalUsage) * 100 : 0.0;
+            double gridPortion = totalUsage > 0
+                    ? (gridUsed / totalUsage) * 100
+                    : 0.0;
 
-
-
+            // Entity laden oder neu anlegen
             EnergyPercentage percentage = repository.findByHour(hourDateTime)
-                    .orElse(null);
-
-            if (percentage == null) {
-                percentage = new EnergyPercentage();
-                percentage.setHour(hourDateTime);
-                log.info("Creating new EnergyPercentage entry for hour: {}", hourDateTime);
-            } else {
-                log.info("Updating existing EnergyPercentage entry with ID {} for hour: {}", percentage.getId(), hourDateTime);
-            }
+                    .orElseGet(() -> {
+                        EnergyPercentage p = new EnergyPercentage();
+                        p.setHour(hourDateTime);
+                        return p;
+                    });
 
             percentage.setCommunityDepleted(communityDepleted);
             percentage.setGridPortion(gridPortion);
-            log.info("Saving: hour={}, depleted={}%, gridPortion={}%", hourDateTime, communityDepleted, gridPortion);
 
             repository.save(percentage);
-            log.info("Updated energy percentages for hour: {}", hourDateTime);
+            log.info("Saved percentages for hour {}: depleted={}%, gridPortion={}%",
+                    hourDateTime, communityDepleted, gridPortion);
+
         } catch (Exception e) {
-            log.error("Error processing message for percentage calculation", e);
+            log.error("Error processing percentage for message: {}", message, e);
         }
     }
 }
-
-
-
-
-

@@ -5,11 +5,12 @@ import java.time.LocalDateTime;
 
 public record CurrentHourDto(
         LocalDateTime hour,
-        double communityProduced,
+        /* double communityProduced,
         double communityUsed,
         double gridUsed,
         double communityPoolPercentage,
         double gridPortionPercentage,
+         */
         int id,
         double communityDepleted,
         double gridPortion

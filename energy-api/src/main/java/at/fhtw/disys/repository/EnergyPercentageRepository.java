@@ -11,5 +11,4 @@ public interface EnergyPercentageRepository extends JpaRepository<EnergyPercenta
 
     Optional<EnergyPercentage> findByHour(LocalDateTime hour);
 
-    List<EnergyPercentage> findAllByHourBetween(LocalDateTime start, LocalDateTime end);
 }

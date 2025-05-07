@@ -7,6 +7,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Spinner?>
 
+<?import javafx.scene.control.TextArea?>
 <VBox spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="at.fhtw.disys.UserInterface.DashboardController">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
@@ -32,4 +33,8 @@
     <Label text="Community produced  143.024 kWh" fx:id="communityProducedLabel"/>
     <Label text="Community used  130.101 kWh" fx:id="communityUsedLabel"/>
     <Label text="Grid used  14.75 kWh" fx:id="gridUsedLabel"/>
+    <!-- Historische Daten anzeigen -->
+
 </VBox>
+
+

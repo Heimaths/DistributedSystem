@@ -5,7 +5,15 @@ import java.time.LocalDateTime;
 
 public record HistoricDto(
         LocalDateTime timestamp,
+        LocalDateTime hour,
         double communityProduced,
         double communityUsed,
-        double gridUsed
+        double gridUsed,
+        int id
+
+       /*double communityPoolPercentage,
+        double gridPortionPercentage,
+        double communityDepleted,
+        double gridPortion
+        */
 ) {}

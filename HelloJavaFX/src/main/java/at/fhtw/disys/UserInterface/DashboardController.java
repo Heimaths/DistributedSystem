@@ -1,24 +1,22 @@
 package at.fhtw.disys.UserInterface;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import at.fhtw.disys.UserInterface.dto.CurrentHourDto;
 import at.fhtw.disys.UserInterface.dto.HistoricDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
-
 
 public class DashboardController {
     @FXML private Label communityPoolLabel;
@@ -32,15 +30,21 @@ public class DashboardController {
     @FXML private Label communityProducedLabel;
     @FXML private Label communityUsedLabel;
     @FXML private Label gridUsedLabel;
+    @FXML private TextArea historyTextArea;
 
     private final HttpClient http = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-    private final DateTimeFormatter fmt = DateTimeFormatter.ISO_DATE_TIME;
+    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
     @FXML
     private void initialize() {
         mapper.registerModule(new JavaTimeModule());
-        // Spinner initialisieren
+        mapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        // Default dates to today to avoid nulls
+        startDatePicker.setValue(java.time.LocalDate.now());
+        endDatePicker.setValue(java.time.LocalDate.now());
+
         startTimeSpinner.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 0));
         endTimeSpinner.setValueFactory(
@@ -64,15 +68,13 @@ public class DashboardController {
         try {
             var dto = mapper.readValue(json, CurrentHourDto.class);
             Platform.runLater(() -> {
-                double rounded = Math.round(dto.communityDepleted() * 100.0) / 100.0;
-                double rounded2 = Math.round(dto.gridPortion() * 100.0) / 100.0;
+                double depleted = Math.round(dto.communityDepleted() * 100.0) / 100.0;
+                double gridPortionVal = Math.round(dto.gridPortion() * 100.0) / 100.0;
 
-                communityPoolLabel.setText("Community Pool " + String.format("%.2f", rounded) + "%");
-                gridPortionLabel.setText("Grid Portion  " + String.format("%.2f", rounded2) + "%");
+                communityPoolLabel.setText(String.format("Community Pool: %.2f%%", depleted));
+                gridPortionLabel.setText(String.format("Grid Portion: %.2f%%", gridPortionVal));
 
-                communityProducedLabel.setText("Community produced  " + dto.communityProduced());
-                communityUsedLabel.setText("Community used  " + dto.communityUsed());
-                gridUsedLabel.setText("Grid used  " + dto.gridUsed());
+
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,16 +82,23 @@ public class DashboardController {
     }
 
     private void fetchHistory() {
-        var from = LocalDateTime.of(
+        if (startDatePicker.getValue() == null || endDatePicker.getValue() == null) {
+            Platform.runLater(() -> {
+                new Alert(Alert.AlertType.WARNING, "Bitte Start- und End-Datum wählen!", ButtonType.OK)
+                        .showAndWait();
+            });
+            return;
+        }
+        LocalDateTime from = LocalDateTime.of(
                 startDatePicker.getValue(),
-                java.time.LocalTime.of(startTimeSpinner.getValue(), 0)
+                LocalTime.of(startTimeSpinner.getValue(), 0)
         );
-        var to = LocalDateTime.of(
+        LocalDateTime to = LocalDateTime.of(
                 endDatePicker.getValue(),
-                java.time.LocalTime.of(endTimeSpinner.getValue(), 0)
+                LocalTime.of(endTimeSpinner.getValue(), 0)
         );
         String uri = String.format(
-                "http://localhost:8080/api/history?from=%s&to=%s",
+                "http://localhost:8084/energy/historical?start=%s&end=%s",
                 from.format(fmt), to.format(fmt)
         );
         var req = HttpRequest.newBuilder()
@@ -97,21 +106,34 @@ public class DashboardController {
                 .GET().build();
         http.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(this::showHistoryInConsole)
+                .thenAccept(this::displayHistory)
                 .exceptionally(ex -> { ex.printStackTrace(); return null; });
     }
 
-    private void showHistoryInConsole(String json) {
+    private void displayHistory(String json) {
         try {
             List<HistoricDto> list = mapper.readValue(
-                    json, new TypeReference<>() {}
-            );
-            // Beispiel: einfach mal in der Konsole
-            list.forEach(d -> System.out.println(d));
+                    json, new TypeReference<List<HistoricDto>>() {});
+            Platform.runLater(() -> {
+                // Kumulierte Summen berechnen
+                double totalProduced = 0.0;
+                double totalUsed = 0.0;
+                double totalGrid = 0.0;
+                for (HistoricDto d : list) {
+                    totalProduced += d.communityProduced();
+                    totalUsed += d.communityUsed();
+                    totalGrid += d.gridUsed();
+                }
+
+                // Summen in Labels anzeigen
+                communityProducedLabel.setText(String.format("Produced: %.2f kWh", totalProduced));
+                communityUsedLabel.setText(String.format("Used: %.2f kWh", totalUsed));
+                gridUsedLabel.setText(String.format("Grid: %.2f kWh", totalGrid));
+
+
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 }
