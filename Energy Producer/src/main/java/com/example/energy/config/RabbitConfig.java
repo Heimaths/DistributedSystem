@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
     @Bean
     public Queue energyQueue() {
-        return new Queue("energy-queue", true);
+        return new Queue("Producer-energy-queue", true);
     }
 }

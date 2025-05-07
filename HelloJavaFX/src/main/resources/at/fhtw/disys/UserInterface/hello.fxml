@@ -12,8 +12,8 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-    <Label text="Community Pool  78.54% used" fx:id="communityPoolLabel"/>
-    <Label text="Grid Portion  7.23%" fx:id="gridPortionLabel"/>
+    <Label text="Community Pool %" fx:id="communityPoolLabel"/>
+    <Label text="Grid Portion %" fx:id="gridPortionLabel"/>
 
     <Button text="refresh" fx:id="refreshButton"/>
 

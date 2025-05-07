@@ -9,5 +9,8 @@ public record CurrentHourDto(
         double communityUsed,
         double gridUsed,
         double communityPoolPercentage,
-        double gridPortionPercentage
+        double gridPortionPercentage,
+        int id,
+        double communityDepleted,
+        double gridPortion
 ) {}

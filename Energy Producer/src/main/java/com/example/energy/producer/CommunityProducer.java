@@ -35,7 +35,7 @@ public class CommunityProducer {
                 kwh,
                 LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         );
-        rabbitTemplate.convertAndSend("energy-queue", message);
+        rabbitTemplate.convertAndSend("Producer-energy-queue", message);
         System.out.println("Automatically sent: " + message);
     }
 

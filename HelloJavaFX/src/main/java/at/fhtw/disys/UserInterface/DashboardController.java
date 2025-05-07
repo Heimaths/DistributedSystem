@@ -1,5 +1,8 @@
 package at.fhtw.disys.UserInterface;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import at.fhtw.disys.UserInterface.dto.CurrentHourDto;
 import at.fhtw.disys.UserInterface.dto.HistoricDto;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,6 +39,7 @@ public class DashboardController {
 
     @FXML
     private void initialize() {
+        mapper.registerModule(new JavaTimeModule());
         // Spinner initialisieren
         startTimeSpinner.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 0));
@@ -48,7 +52,7 @@ public class DashboardController {
 
     private void fetchCurrentHour() {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/current-hour"))
+                .uri(URI.create("http://localhost:8084/energy/current"))
                 .GET().build();
         http.sendAsync(req, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -60,8 +64,12 @@ public class DashboardController {
         try {
             var dto = mapper.readValue(json, CurrentHourDto.class);
             Platform.runLater(() -> {
-                communityPoolLabel.setText("Community Pool  " + dto.communityPoolPercentage() + "%");
-                gridPortionLabel.setText("Grid Portion  " + dto.gridPortionPercentage() + "%");
+                double rounded = Math.round(dto.communityDepleted() * 100.0) / 100.0;
+                double rounded2 = Math.round(dto.gridPortion() * 100.0) / 100.0;
+
+                communityPoolLabel.setText("Community Pool " + String.format("%.2f", rounded) + "%");
+                gridPortionLabel.setText("Grid Portion  " + String.format("%.2f", rounded2) + "%");
+
                 communityProducedLabel.setText("Community produced  " + dto.communityProduced());
                 communityUsedLabel.setText("Community used  " + dto.communityUsed());
                 gridUsedLabel.setText("Grid used  " + dto.gridUsed());
