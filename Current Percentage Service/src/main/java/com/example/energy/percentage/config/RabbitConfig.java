@@ -1,6 +1,4 @@
-// src/main/java/com/example/energy/percentage/config/RabbitConfig.java
 package com.example.energy.percentage.config;
-
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
