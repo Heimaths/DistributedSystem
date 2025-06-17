@@ -14,6 +14,7 @@
         <module name="HelloJavaFX" />
         <module name="percentage-service" />
         <module name="energy-consumer" />
+        <module name="Energy Api" />
         <module name="energy-producer" />
       </profile>
     </annotationProcessing>
@@ -21,12 +22,14 @@
       <module name="disys-energy-app" target="17" />
       <module name="disys-energy-app (1)" target="17" />
       <module name="disys-energy-app (2)" target="17" />
+      <module name="JavaFX" target="17" />
       <module name="Usage Service" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Consumer" options="-parameters" />
+      <module name="Energy Api" options="-parameters" />
       <module name="Producer" options="-parameters" />
       <module name="disys-energy-app" options="-parameters" />
       <module name="disys-energy-app (1)" options="-parameters" />
