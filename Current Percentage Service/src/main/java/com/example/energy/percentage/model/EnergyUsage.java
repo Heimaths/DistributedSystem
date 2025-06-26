@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "energy_usage")
-@Data
+@Entity // JPA-Entity: wird von Hibernate als Tabelle in der DB verwaltet
+@Table(name = "energy_usage") // Tabelle heißt explizit "energy_percentage"
+@Data // Lombok: erzeugt automatisch Getter, Setter, toString, equals, hashCode
 public class EnergyUsage {
-    @Id
+    @Id //Primärschlüssel
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -15,9 +15,21 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+/*
+Empfängt Energie-Nachrichten über RabbitMQ
+Holt für die übermittelte Stunde den Verbrauch
+Berechnet:
+Wie viel selbst erzeugte Energie genutzt wurde
+Wie viel Energie vom Stromnetz kam
+Speichert das Ergebnis in EnergyPercentage (pro Stunde)
+*/
+
 @Service
-@Slf4j
+@Slf4j // Logging über Lombok
 public class PercentageService {
+
+    // UsageDataService: Holt Verbrauchsdaten
+    // percentageRepo: Speichert berechnete Prozentwerte
     private final UsageDataService usageDataService;
     private final EnergyPercentageRepository percentageRepo;
 
@@ -27,6 +39,8 @@ public class PercentageService {
         this.percentageRepo   = percentageRepo;
     }
 
+    // Diese Methode wird automatisch aufgerufen, wenn eine neue Nachricht auf Producer-energy-queue empfangen wird.
+    // @Transactional: alle DB-Operationen laufen in einer Transaktion
     @RabbitListener(queues = "Producer-energy-queue")
     @Transactional
     public void handleProducer(String message) throws JsonProcessingException {
@@ -35,6 +49,7 @@ public class PercentageService {
     // … handleConsumer identisch …
 
     private void processPercentage(String message) throws JsonProcessingException {
+        // JSON wird eingelesen und der Zeitstempel auf volle Stunde gekürzt
         JsonNode json = new ObjectMapper().readTree(message);
         LocalDateTime dt = LocalDateTime.parse(json.get("datetime").asText())
                 .truncatedTo(ChronoUnit.HOURS);
@@ -53,15 +68,17 @@ public class PercentageService {
         double gridUsed          = usage.getGridUsed();
 
         // 3) Berechne Prozente
+        // communityDepleted → Wie viel der selbst erzeugten Energie wurde verbraucht?
+        // gridPortion → Welcher Anteil des Gesamtverbrauchs kam aus dem Netz?
         double communityDepleted = communityProduced > 0
                 ? Math.min((communityUsed / communityProduced) * 100, 100.0)
-                : 100.0;
+                : 100.0; // Berechnet, wie viel von der selbst erzeugten Energie verbraucht wurde. Wenn nichts erzeugt wurde: depleted = 100%
         double totalUsage = communityUsed + gridUsed;
         double gridPortion = totalUsage > 0
                 ? (gridUsed / totalUsage) * 100
                 : 0.0;
 
-        // 4) Speichere oder updeite die EnergyPercentage-Entity
+        // 4) Speichere oder update die EnergyPercentage-Entity
         EnergyPercentage p = percentageRepo.findByHour(dt)
                 .orElseGet(() -> {
                     EnergyPercentage e = new EnergyPercentage();

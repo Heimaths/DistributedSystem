@@ -3,57 +3,72 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion> <!-- Maven-Modellversion -->
 
     <parent>
+        <!-- Verwendet Spring Boot Parent-POM -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.2</version>
         <relativePath/>
     </parent>
 
+    <!-- Projektkoordinaten -->
     <groupId>com.example</groupId>
     <artifactId>percentage-service</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>Current Percentage Service</name>
     <description>Energy Usage Percentage Calculation Service</description>
-    <packaging>jar</packaging>
+    <packaging>jar</packaging> <!-- Das Projekt wird als ausführbare JAR verpackt -->
 
     <dependencies>
+        <!-- Basis-Abhängigkeit: bringt grundlegende Spring-Funktionalität (Core, Logging usw.) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
+        <!-- AMQP (RabbitMQ) Unterstützung für Messaging via @RabbitListener usw. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+
+        <!-- Web-Funktionalität: REST-Controller, Tomcat, JSON-Konvertierung mit Jackson -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!-- JPA- und Hibernate-Unterstützung: Entity-Management und Repository-Interfaces -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+
+        <!-- PostgreSQL JDBC-Treiber, benötigt zur Laufzeit -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Lombok: generiert Getter, Setter, Konstruktoren, Logging usw. -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <optional>true</optional> <!-- Lombok ist optional, nur zur Entwicklungszeit nötig -->
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Spring Boot Plugin: ermöglicht 'mvn spring-boot:run' und erzeugt ausführbare JARs -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- Lombok wird aus dem finalen Artefakt ausgeschlossen (da zur Laufzeit nicht nötig) -->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -64,4 +79,4 @@
             </plugin>
         </plugins>
     </build>
-</project> 
+</project>

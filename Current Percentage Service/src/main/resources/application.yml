@@ -1,32 +1,31 @@
 spring:
   application:
-    name: energy-percentage-service
+    name: energy-percentage-service   # Name der Spring-Boot-Anwendung
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/energy_usage_db
+  datasource:                         # Hauptdatenquelle für Spring Data / JPA
+    url: jdbc:postgresql://localhost:5432/energy_usage_db   # Verbindungs-URL zur PostgreSQL-Datenbank
     username: disysuser
     password: disyspw
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver  # JDBC-Treiberklasse für PostgreSQL
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect  # JPA-Dialekt für PostgreSQL
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update             # Schema automatisch anpassen
+    show-sql: true                 # Zeigt SQL-Statements in der Konsole (hilfreich zum Debuggen)
 
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+  rabbitmq:                         # RabbitMQ-Konfiguration (für Messaging)
+    host: localhost                 # RabbitMQ läuft lokal
+    port: 5672                      # Standardport von RabbitMQ
+    username: guest                 # Standard-Benutzername
+    password: guest                 # Standard-Passwort
 
 usage:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/energy_usage_db
+  datasource:                       # Zusätzliche Datenquelle
+    url: jdbc:postgresql://localhost:5432/energy_usage_db   # Gleiche Datenbank wie oben
     username: disysuser
     password: disyspw
     driver-class-name: org.postgresql.Driver
 
 server:
-  port: 8083
+  port: 8083                        # Der Service wird auf Port 8083 erreichbar sein
