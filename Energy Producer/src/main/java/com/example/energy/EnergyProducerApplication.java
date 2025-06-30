@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import static com.example.energy.producer.CommunityProducer.displayWeatherData;
 
 @SpringBootApplication
-@EnableScheduling  // Diese Annotation sorgt dafür, dass @Scheduled Methoden laufen
+@EnableScheduling
 public class EnergyProducerApplication {
     public static void main(String[] args) {
         SpringApplication.run(EnergyProducerApplication.class, args);

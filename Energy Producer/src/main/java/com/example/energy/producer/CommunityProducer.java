@@ -21,7 +21,6 @@ public class CommunityProducer {
     private final Random random = new Random();
     private static double temp = 0;
 
-    // Einmalig konfigurierte HTTP-Client- und JSON-Mapper-Instanzen
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -29,9 +28,8 @@ public class CommunityProducer {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    @Scheduled(fixedRate = 5000)  // alle 5 Sekunden eine Nachricht senden
+    @Scheduled(fixedRate = 5000)
     public void sendPeriodicEnergyMessage() {
-        // Vor dem Senden die Temperatur vom Wetter-API aktualisieren
         displayWeatherData();
 
         double kwh = getRandomKwh();
@@ -48,7 +46,6 @@ public class CommunityProducer {
 
     private double getRandomKwh() {
         if (temp > 10) {
-            // bei hoher Temperatur leicht mehr Erzeugung
             return 0.001 + 0.004 * random.nextDouble() * 2;  // bis zu 0.009 kWh
         } else {
             return 0.001 + 0.004 * random.nextDouble();       // bis zu 0.005 kWh
@@ -57,7 +54,6 @@ public class CommunityProducer {
 
     public static void displayWeatherData() {
         try {
-            // 1. HTTP-Anfrage bauen
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(
                             "https://api.openweathermap.org/data/2.5/weather"
@@ -67,24 +63,20 @@ public class CommunityProducer {
                     .GET()
                     .build();
 
-            // 2. Anfrage senden und Antwort als String erhalten
             HttpResponse<String> response = httpClient.send(
                     request, HttpResponse.BodyHandlers.ofString()
             );
 
-            // 3. Status prüfen
             if (response.statusCode() != 200) {
                 System.out.println("Error: Could not fetch weather data, status = "
                         + response.statusCode());
                 return;
             }
 
-            // 4. JSON in Java-Objekt mappen
             WeatherResponse weather = objectMapper.readValue(
                     response.body(), WeatherResponse.class
             );
 
-            // 5. Temperatur auslesen und speichern
             temp = weather.main.temp;
             System.out.println("Current Temperature (C): " + temp);
 
@@ -93,7 +85,6 @@ public class CommunityProducer {
         }
     }
 
-    // Hilfsklassen für Jackson
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class WeatherResponse {
         public Main main;
