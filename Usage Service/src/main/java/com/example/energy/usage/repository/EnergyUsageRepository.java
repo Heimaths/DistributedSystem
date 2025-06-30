@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface EnergyUsageRepository extends JpaRepository<EnergyUsage, Long> {
     
-    @Query("SELECT e FROM EnergyUsage e WHERE e.hour = ?1")
+    @Query("SELECT e FROM EnergyUsage e WHERE e.hour = ?1") // ist zwar funktionell korrekt, aber optional, weil findByHour ausreicht
     Optional<EnergyUsage> findByHour(LocalDateTime hour);
-} 
+}

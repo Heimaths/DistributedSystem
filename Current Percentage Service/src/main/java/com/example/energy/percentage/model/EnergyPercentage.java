@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-@Entity  // JPA-Entity: wird von Hibernate als Tabelle in der DB verwaltet
+@Entity  // JPA-Entity: wird von Hibernate als Tabelle in der DB verwaltet - JPA ist die Verbindung von Java-Code und SQL
 @Table(name = "energy_percentage")  // Tabelle heißt explizit "energy_percentage"
 @Data   // Lombok: erzeugt automatisch Getter, Setter, toString, equals, hashCode
 public class EnergyPercentage {

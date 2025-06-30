@@ -72,7 +72,8 @@ public class PercentageService {
         // gridPortion → Welcher Anteil des Gesamtverbrauchs kam aus dem Netz?
         double communityDepleted = communityProduced > 0
                 ? Math.min((communityUsed / communityProduced) * 100, 100.0)
-                : 100.0; // Berechnet, wie viel von der selbst erzeugten Energie verbraucht wurde. Wenn nichts erzeugt wurde: depleted = 100%
+                : 100.0; // Berechnet, wie viel von der selbst erzeugten Energie verbraucht wurde.
+                        // Wenn nichts erzeugt wurde: depleted = 100%
         double totalUsage = communityUsed + gridUsed;
         double gridPortion = totalUsage > 0
                 ? (gridUsed / totalUsage) * 100
