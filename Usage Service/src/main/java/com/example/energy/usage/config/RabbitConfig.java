@@ -15,4 +15,11 @@ public class RabbitConfig {
     public Queue consumerEnergyQueue() {
         return new Queue("Consumer-energy-queue", true);
     }
+
+    @Bean
+    public Queue usageUpdateQueue() {
+        // Durable = true, damit die Nachricht auch Broker-Neustarts übersteht
+        return new Queue("Usage-update-queue", true);
+    }
+
 }

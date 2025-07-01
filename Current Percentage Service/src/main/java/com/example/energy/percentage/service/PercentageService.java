@@ -3,8 +3,7 @@ package com.example.energy.percentage.service;
 import com.example.energy.percentage.model.EnergyPercentage;
 import com.example.energy.percentage.model.EnergyUsage;
 import com.example.energy.percentage.repository.EnergyPercentageRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.example.energy.percentage.repository.EnergyUsageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,82 +14,76 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-/*
-Empfängt Energie-Nachrichten über RabbitMQ
-Holt für die übermittelte Stunde den Verbrauch
-Berechnet:
-Wie viel selbst erzeugte Energie genutzt wurde
-Wie viel Energie vom Stromnetz kam
-Speichert das Ergebnis in EnergyPercentage (pro Stunde)
-*/
-
 @Service
-@Slf4j // Logging über Lombok
+@Slf4j
 public class PercentageService {
 
-    // UsageDataService: Holt Verbrauchsdaten
-    // percentageRepo: Speichert berechnete Prozentwerte
-    private final UsageDataService usageDataService;
+    private final EnergyUsageRepository usageRepository;
     private final EnergyPercentageRepository percentageRepo;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public PercentageService(UsageDataService usageDataService,
+    public PercentageService(EnergyUsageRepository usageRepository,
                              EnergyPercentageRepository percentageRepo) {
-        this.usageDataService = usageDataService;
-        this.percentageRepo   = percentageRepo;
+        this.usageRepository = usageRepository;
+        this.percentageRepo  = percentageRepo;
     }
 
-    // Diese Methode wird automatisch aufgerufen, wenn eine neue Nachricht auf Producer-energy-queue empfangen wird.
-    // @Transactional: alle DB-Operationen laufen in einer Transaktion
-    @RabbitListener(queues = "Producer-energy-queue")
+    /**
+     * Hört auf jede Nachricht in der Usage-update-queue
+     * und berechnet die Prozentwerte basierend auf dem aktuellen
+     * Datensatz in energy_usage.
+     */
+    @RabbitListener(queues = "Usage-update-queue")
     @Transactional
-    public void handleProducer(String message) throws JsonProcessingException {
-        processPercentage(message);
-    }
-    // … handleConsumer identisch …
+    public void handleUsageUpdate(String message) {
+        try {
+            // Extrahiere den Stunden-Timestamp aus {"datetime":"..."}
+            String datetimeText = objectMapper
+                    .readTree(message)
+                    .get("datetime").asText();
 
-    private void processPercentage(String message) throws JsonProcessingException {
-        // JSON wird eingelesen und der Zeitstempel auf volle Stunde gekürzt
-        JsonNode json = new ObjectMapper().readTree(message);
-        LocalDateTime dt = LocalDateTime.parse(json.get("datetime").asText())
-                .truncatedTo(ChronoUnit.HOURS);
+            LocalDateTime dt = LocalDateTime.parse(datetimeText)
+                    .truncatedTo(ChronoUnit.HOURS);
 
-        // 1) Holt EnergyUsage per JPA
-        Optional<EnergyUsage> optUsage = usageDataService.getUsageData(dt);
-        if (optUsage.isEmpty()) {
-            log.warn("Keine Usage-Daten für {}", dt);
-            return;
+            // Direkter Zugriff auf usageRepository statt UsageDataService
+            Optional<EnergyUsage> optUsage = usageRepository.findByHour(dt);
+            if (optUsage.isEmpty()) {
+                log.warn("Keine Usage-Daten für {}", dt);
+                return;
+            }
+            EnergyUsage usage = optUsage.get();
+
+            // Werte auslesen
+            double produced = usage.getCommunityProduced();
+            double used     = usage.getCommunityUsed();
+            double grid     = usage.getGridUsed();
+
+            // Prozentberechnung
+            double communityDepleted = produced > 0
+                    ? Math.min((used / produced) * 100, 100.0)
+                    : 100.0;
+            double totalUsage = used + grid;
+            double gridPortion = totalUsage > 0
+                    ? (grid / totalUsage) * 100
+                    : 0.0;
+
+            // Entity anlegen oder laden
+            EnergyPercentage p = percentageRepo.findByHour(dt)
+                    .orElseGet(() -> {
+                        EnergyPercentage e = new EnergyPercentage();
+                        e.setHour(dt);
+                        return e;
+                    });
+            p.setCommunityDepleted(communityDepleted);
+            p.setGridPortion(gridPortion);
+
+            // Speichern
+            percentageRepo.save(p);
+            log.info("Saved percentage for {} → depleted={}%, gridPortion={}%",
+                    dt, communityDepleted, gridPortion);
+
+        } catch (Exception e) {
+            log.error("Failed to process usage update [{}]: {}", message, e.getMessage(), e);
         }
-        EnergyUsage usage = optUsage.get();
-
-        // 2) Lese direkt die Entity-Felder
-        double communityProduced = usage.getCommunityProduced();
-        double communityUsed     = usage.getCommunityUsed();
-        double gridUsed          = usage.getGridUsed();
-
-        // 3) Berechne Prozente
-        // communityDepleted → Wie viel der selbst erzeugten Energie wurde verbraucht?
-        // gridPortion → Welcher Anteil des Gesamtverbrauchs kam aus dem Netz?
-        double communityDepleted = communityProduced > 0
-                ? Math.min((communityUsed / communityProduced) * 100, 100.0)
-                : 100.0; // Berechnet, wie viel von der selbst erzeugten Energie verbraucht wurde.
-                        // Wenn nichts erzeugt wurde: depleted = 100%
-        double totalUsage = communityUsed + gridUsed;
-        double gridPortion = totalUsage > 0
-                ? (gridUsed / totalUsage) * 100
-                : 0.0;
-
-        // 4) Speichere oder update die EnergyPercentage-Entity
-        EnergyPercentage p = percentageRepo.findByHour(dt)
-                .orElseGet(() -> {
-                    EnergyPercentage e = new EnergyPercentage();
-                    e.setHour(dt);
-                    return e;
-                });
-        p.setCommunityDepleted(communityDepleted);
-        p.setGridPortion(gridPortion);
-        percentageRepo.save(p);
-
-        log.info("Gespeichert: {} – depleted={}%, gridPortion={}%",
-                dt, communityDepleted, gridPortion);
     }
 }
