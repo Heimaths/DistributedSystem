@@ -21,7 +21,7 @@ public class UsageService {
 
     private final EnergyUsageRepository repository;
     private final ObjectMapper objectMapper;
-    private final RabbitTemplate rabbitTemplate;  // neu: zum Senden der Update-Nachricht
+    private final RabbitTemplate rabbitTemplate;  //zum Senden der Update-Nachricht
 
     public UsageService(EnergyUsageRepository repository,
                         ObjectMapper objectMapper,
@@ -75,7 +75,7 @@ public class UsageService {
                     isProducer ? "producer" : "consumer",
                     hourDateTime, kwh);
 
-            // **Neu**: nach jedem Aggregat-Update eine Kurzmeldung in die Usage-update-queue
+            // Nach jedem Aggreggieren der Daten eine Kurzmeldung in die Usage-update-queue
 
             String updateMsg = String.format(
                     java.util.Locale.US,
