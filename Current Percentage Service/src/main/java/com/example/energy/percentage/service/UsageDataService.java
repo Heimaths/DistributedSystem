@@ -1,4 +1,4 @@
-package com.example.energy.percentage.service;
+/** package com.example.energy.percentage.service;
 
 import com.example.energy.percentage.model.EnergyUsage;
 import com.example.energy.percentage.repository.EnergyUsageRepository;
