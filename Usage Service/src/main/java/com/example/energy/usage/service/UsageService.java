@@ -76,13 +76,15 @@ public class UsageService {
                     hourDateTime, kwh);
 
             // **Neu**: nach jedem Aggregat-Update eine Kurzmeldung in die Usage-update-queue
+
             String updateMsg = String.format(
-                    Locale.US,
-                    "{\"datetime\":\"%s\"}",
-                    hourDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    java.util.Locale.US,
+                    "{\"type\": \"USER\", \"association\": \"COMMUNITY\", \"kwh\": %.3f, \"datetime\": \"%s\"}",
+                    kwh,
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
             rabbitTemplate.convertAndSend("Usage-update-queue", updateMsg);
-            log.info("Sent usage-update notification for hour {}", hourDateTime);
+            log.info("Sent usage-update notification for hour {}", hourDateTime); //test nicht vollständig
 
         } catch (Exception e) {
             log.error("Error processing message: {}", message, e);
