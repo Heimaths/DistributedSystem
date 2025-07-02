@@ -5,10 +5,10 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity // JPA-Entity: wird von Hibernate als Tabelle in der DB verwaltet
-@Table(name = "energy_usage") // Tabelle heißt explizit "energy_percentage"
-@Data // Lombok: erzeugt automatisch Getter, Setter, toString, equals, hashCode
+@Table(name = "energy_usage")
+@Data // Lombok: erzeugt automatisch Getter, Setter, ...
 public class EnergyUsage {
-    @Id //Primärschlüssel
+    @Id // Primärschlüssel
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

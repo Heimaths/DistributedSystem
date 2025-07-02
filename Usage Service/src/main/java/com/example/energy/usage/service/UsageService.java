@@ -84,7 +84,7 @@ public class UsageService {
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             );
             rabbitTemplate.convertAndSend("Usage-update-queue", updateMsg);
-            log.info("Sent usage-update notification for hour {}", hourDateTime); //test nicht vollständig
+            log.info("Sent usage-update notification for hour {}", hourDateTime);
 
         } catch (Exception e) {
             log.error("Error processing message: {}", message, e);

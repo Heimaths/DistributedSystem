@@ -45,7 +45,7 @@ public class PercentageService {
             LocalDateTime dt = LocalDateTime.parse(datetimeText)
                     .truncatedTo(ChronoUnit.HOURS);
 
-            // Direkter Zugriff auf usageRepository statt UsageDataService
+            // Direkter Zugriff auf usageRepository
             Optional<EnergyUsage> optUsage = usageRepository.findByHour(dt);
             if (optUsage.isEmpty()) {
                 log.warn("Keine Usage-Daten für {}", dt);
